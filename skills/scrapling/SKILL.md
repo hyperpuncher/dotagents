@@ -91,7 +91,7 @@ scrapling extract get "https://api.example.com" data.json \
 -H, --headers TEXT              HTTP headers "Key: Value" (multiple allowed)
 --cookies TEXT                  Cookies "name1=value1;name2=value2"
 --timeout INTEGER               Request timeout in seconds (default: 30)
---proxy TEXT                    Proxy URL "http://username:password@host:port"
+--proxy TEXT                    Proxy URL from $PROXY_URL env variable
 -s, --css-selector TEXT         Extract specific content with CSS selector
 -p, --params TEXT               Query parameters "key=value" (multiple)
 --follow-redirects / --no-follow-redirects  (default: True)
@@ -200,9 +200,9 @@ scrapling extract stealthy-fetch "https://nopecha.com/demo/cloudflare" data.txt 
     --solve-cloudflare \
     --css-selector "#padded_content a"
 
-# Use proxy for anonymity
+# Use proxy for anonymity (set PROXY_URL environment variable)
 scrapling extract stealthy-fetch "https://site.com" content.md \
-    --proxy "http://proxy-server:8080"
+    --proxy "$PROXY_URL"
 
 # Hide canvas fingerprint
 scrapling extract stealthy-fetch "https://example.com" content.md \
