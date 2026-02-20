@@ -1,6 +1,6 @@
 ---
 name: scrapling
-description: CLI tool for web scraping - extract data from websites via terminal without programming. Powerful extract commands for HTTP requests and browser automation, with interactive shell as fallback.
+description: CLI tool for web scraping - extract data from websites via terminal without programming. Powerful extract commands for HTTP requests and browser automation.
 ---
 
 # scrapling
@@ -245,51 +245,6 @@ scrapling extract fetch "https://example.com" products.md \
     --network-idle
 ```
 
-## Interactive Shell (Fallback/Debugging)
-
-Use the interactive shell when you need to explore, debug, or prototype scraping strategies interactively.
-
-```bash
-scrapling shell                    # Start interactive shell
-scrapling shell -c "code"          # Execute code and exit
-scrapling shell --loglevel info    # Set logging level
-```
-
-**Built-in shortcuts (no imports needed):**
-
-| Shortcut                        | Description                              |
-| ------------------------------- | ---------------------------------------- |
-| `get(url, **kwargs)`            | HTTP GET request                         |
-| `post(url, **kwargs)`           | HTTP POST request                        |
-| `put(url, **kwargs)`            | HTTP PUT request                         |
-| `delete(url, **kwargs)`         | HTTP DELETE request                      |
-| `fetch(url, **kwargs)`          | Browser-based fetch (DynamicFetcher)     |
-| `stealthy_fetch(url, **kwargs)` | Stealthy browser fetch (StealthyFetcher) |
-
-**Auto-available classes:** `Fetcher`, `AsyncFetcher`, `DynamicFetcher`, `StealthyFetcher`, `Selector`
-
-**Smart page management:**
-
-- `page` / `response` - Always refers to the last fetched page
-- `pages` - History of last 5 pages (Selectors object)
-
-**Helper commands:**
-
-- `view(page)` - Opens page HTML in default browser
-- `uncurl(curl_cmd)` - Convert curl command to request object
-- `curl2fetcher(curl_cmd)` - Convert and execute curl command directly
-
-**Example shell session:**
-
-```python
->>> get('https://news.ycombinator.com')
->>> stories = page.css('.titleline>a')
->>> len(stories)
-30
->>> for story in stories[:3]:
-...     print(f"{story.text}: {story['href']}")
-```
-
 ## Help Commands
 
 ```bash
@@ -299,7 +254,6 @@ scrapling extract get --help
 scrapling extract post --help
 scrapling extract fetch --help
 scrapling extract stealthy-fetch --help
-scrapling shell --help
 ```
 
 ## Resources
