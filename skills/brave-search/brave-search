@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+
+q="$1"
+tmpfile=$(mktemp --suffix=.md)
+trap 'rm "$tmpfile"' EXIT
+
+scrapling extract fetch \
+	--disable-resources \
+	--proxy "$PROXY_URL" \
+	--css-selector ".result-content" \
+	"https://search.brave.com/search?q=$q" \
+	"$tmpfile" 2>/dev/null
+
+sd "(!?\[.*?imgs\.search\.brave\.com|.*›).*\n*" "" <"$tmpfile"
