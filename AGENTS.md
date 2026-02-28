@@ -1,0 +1,6 @@
+- conventional commits (`feat|fix|refactor|build|ci|chore|docs|style|perf|test`)
+- clone repo to `/tmp` if needed for reference
+- use repo's package manager
+- always typecheck, lint and format
+- use `trash` instead of `rm`
+- use `/tmp` for temporary files
