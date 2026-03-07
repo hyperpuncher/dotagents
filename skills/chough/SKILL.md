@@ -18,6 +18,9 @@ description: Fast ASR CLI tool for transcribing audio/video files. Use when user
 # Basic transcription (text to stdout)
 chough audio.mp3
 
+# Pipe audio from stdin
+cat audio.mp3 | chough
+
 # JSON with timestamps
 chough -f json podcast.mp3 > transcript.json
 
