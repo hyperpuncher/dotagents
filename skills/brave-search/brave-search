@@ -6,9 +6,11 @@ trap 'rm "$tmpfile"' EXIT
 
 scrapling extract fetch \
 	--disable-resources \
+	--ai-targeted \
 	--proxy "$PROXY_URL" \
 	--css-selector ".result-content" \
 	"https://search.brave.com/search?q=$q" \
 	"$tmpfile" 2>/dev/null
 
-sd "(!?\[.*?imgs\.search\.brave\.com|.*›).*\n*" "" <"$tmpfile"
+sd "(!?\[.*?imgs\.search\.brave\.com|.*›).*\n*" "" <"$tmpfile" |
+	sd -A "\n{3,}" "\n\n"
