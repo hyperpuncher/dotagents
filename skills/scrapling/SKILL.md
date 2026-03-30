@@ -21,6 +21,12 @@ Then install fetcher dependencies (browsers, system dependencies, fingerprint ma
 scrapling install
 ```
 
+Update to the latest version:
+
+```bash
+uv tool update "scrapling[shell]"
+```
+
 ## Extract Commands (Primary Usage)
 
 The `scrapling extract` command group allows you to download and extract content from websites without writing any code. Output format is determined by file extension:
