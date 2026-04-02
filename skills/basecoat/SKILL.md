@@ -1,16 +1,16 @@
 ---
 name: basecoat
-description: Guide for Basecoat - a framework-agnostic, Tailwind CSS v4-first component library built with semantic HTML and vanilla JS. Think "shadcn/ui without a framework." Use when the user wants to build UI components, style forms, or create interactive elements (tabs, popovers, selects) without React/Vue/Svelte. Covers installation, theming, CSS-only and JS-enhanced components, accessibility, and troubleshooting.
+description: Guide for Basecoat - a Tailwind CSS v4-first component library using semantic HTML and vanilla JS. Think "shadcn/ui without a framework." Use when building UI components without React/Vue/Svelte.
 ---
 
-# Basecoat UI
+# Basecoat
 
-- Basecoat docs: https://basecoatui.com
+- Docs: https://basecoatui.com
 - Package: `basecoat-css`
 
-## Installation
+## Install
 
-### CDN (no build tool)
+**CDN:**
 
 ```html
 <link
@@ -23,397 +23,148 @@ description: Guide for Basecoat - a framework-agnostic, Tailwind CSS v4-first co
 ></script>
 ```
 
-For per-component JS, include `basecoat.min.js` then component files like `tabs.min.js`, `select.min.js`, etc.
-
-### NPM (Tailwind projects)
+**NPM:**
 
 ```bash
 npm i basecoat-css
 ```
-
-In your CSS:
 
 ```css
 @import "tailwindcss";
 @import "basecoat-css";
 ```
 
-### ESM imports
+**ESM:**
 
 ```js
 import "basecoat-css/all";
-// or cherry-pick:
-import "basecoat-css/tabs";
-import "basecoat-css/select";
-import "basecoat-css/popover";
-import "basecoat-css/dropdown-menu";
-import "basecoat-css/sidebar";
-import "basecoat-css/toast";
+// or: import "basecoat-css/tabs";
 ```
 
-## JavaScript initialization
+## JS Init
 
-- Auto‑initializes on `DOMContentLoaded`; observes DOM for new nodes
-- Manual re‑init: `window.basecoat.init('<name>')` or `window.basecoat.initAll()`
+- Auto-init on `DOMContentLoaded`
+- Manual: `window.basecoat.init('tabs')` or `window.basecoat.initAll()`
+
+## Icons
+
+Basecoat uses [Lucide icons](https://lucide.dev). Options:
+
+1. **Copy SVG**: Visit [lucide.dev/icons](https://lucide.dev/icons), click any icon to copy SVG
+2. **Install package**: `npm i lucide` - see [lucide.dev/guide/installation](https://lucide.dev/guide/installation)
+3. **Framework packages**: [lucide.dev/packages](https://lucide.dev/packages) for React/Vue/Angular/etc
 
 ## Theming
 
-- Tailwind projects: override design tokens (e.g., `primary`, `muted-foreground`) in your theme
-- CDN: add CSS overrides after the link tag
+Basecoat is fully compatible with [shadcn/ui themes](https://ui.shadcn.com/themes):
 
-## Design tokens
+1. Go to [ui.shadcn.com/themes](https://ui.shadcn.com/themes) or [tweakcn.com](https://tweakcn.com)
+2. Click "Copy code" and save to `theme.css`
+3. Import after Basecoat:
 
-Common semantic tokens: `background`, `foreground`, `primary`, `primary-foreground`, `secondary`, `secondary-foreground`, `accent`, `accent-foreground`, `muted`, `muted-foreground`, `card`, `card-foreground`, `popover`, `popover-foreground`, `destructive`, `ring`, `input`, `border`
+```css
+@import "tailwindcss";
+@import "basecoat-css";
+@import "./theme.css";
+```
+
+## Styling & Customization
+
+**Override with Tailwind:**
+
+```html
+<button class="btn font-normal">Custom button</button>
+```
+
+**Override with custom CSS:**
+
+```css
+@import "tailwindcss";
+@import "basecoat-css";
+@import "./custom.css";
+```
+
+**Copy and modify source:**
+Copy [basecoat.css](https://github.com/hunvreus/basecoat/blob/main/src/css/basecoat.css) into your project and customize directly.
+
+## Tokens
+
+Common design tokens: `background`, `foreground`, `primary`, `primary-foreground`, `secondary`, `secondary-foreground`, `accent`, `accent-foreground`, `muted`, `muted-foreground`, `card`, `card-foreground`, `popover`, `popover-foreground`, `destructive`, `ring`, `input`, `border`
 
 ## Components
 
-### Alert
-
-Alerts inform users about important events.
-
-```html
-<div role="alert" class="alert">{CONTENT}</div>
-<!-- Destructive variant: -->
-<div role="alert" class="alert alert-destructive">{CONTENT}</div>
-```
-
-### Avatar
-
-User thumbnail with fallback.
-
-```html
-<div class="avatar"><img src="{image-url}" alt="{alt}" /></div>
-```
-
-### Badge
-
-Status indicators and counts.
-
-```html
-<span class="badge">{TEXT}</span>
-<span class="badge badge-outline">{TEXT}</span>
-<span class="badge badge-destructive">{TEXT}</span>
-```
-
-### Button
-
-```html
-<button class="btn">{CONTENT}</button>
-<!-- Styles: btn-primary, btn-secondary, btn-outline, btn-ghost, btn-link, btn-destructive -->
-<!-- Sizes: btn-sm, btn-lg -->
-<!-- Icon: btn-icon, btn-sm-icon, btn-lg-icon -->
-<button class="btn btn-primary btn-sm" disabled>{CONTENT}</button>
-```
-
-Use `aria-pressed="true"` for toggle buttons.
-
-### Button Group
-
-```html
-<div class="button-group" data-orientation="horizontal|vertical">
-	<button class="btn">A</button>
-	<hr role="separator" />
-	<button class="btn">B</button>
-</div>
-```
-
-### Card
-
-```html
-<article class="card">
-	<header>
-		<h2>{TITLE}</h2>
-		<p>{SUBTITLE}</p>
-	</header>
-	<section>{CONTENT}</section>
-	<footer>{ACTIONS}</footer>
-</article>
-```
-
-### Checkbox (CSS)
-
-```html
-<input type="checkbox" class="input" />
-```
-
-### Radio Group (CSS)
-
-```html
-<label><input type="radio" class="input" name="{name}" /> {LABEL}</label>
-```
-
-### Switch (CSS)
-
-```html
-<input type="checkbox" role="switch" class="input" />
-```
-
-### Input
-
-```html
-<input type="text" class="input" placeholder="{Placeholder}" />
-```
-
-### Textarea
-
-```html
-<textarea class="textarea" rows="{n}"></textarea>
-```
-
-### Label
-
-```html
-<label class="label" for="{id}">{TEXT}</label>
-```
-
-### Select (JS)
-
-Requires JS. Custom select with searchable popover and listbox.
-
-```html
-<div class="select">
-	<button type="button" aria-expanded="false"><span>{LABEL}</span></button>
-	<input type="hidden" name="{name}" value="{value}" />
-	<section data-popover aria-hidden="true">
-		<header><input type="text" placeholder="Filter" /></header>
-		<div role="listbox">
-			<div role="option" data-value="{value}" data-label="{label}">{label}</div>
-		</div>
-	</section>
-</div>
-```
-
-Dispatches `change` on root with `detail.value`. Disabled options use `aria-disabled="true"`.
-
-### Combobox (JS)
-
-Typeahead component with similar structure to Select.
-
-### Tabs (JS)
-
-```html
-<div class="tabs">
-	<div role="tablist">
-		<button role="tab" aria-controls="panel-1" aria-selected="true" tabindex="0">
-			Tab 1
-		</button>
-		<button role="tab" aria-controls="panel-2" aria-selected="false" tabindex="-1">
-			Tab 2
-		</button>
-	</div>
-	<section id="panel-1" role="tabpanel">...</section>
-	<section id="panel-2" role="tabpanel" hidden>...</section>
-</div>
-```
-
-Arrow keys move focus; keep `aria-controls` and `aria-selected` accurate.
-
-### Popover (JS)
-
-```html
-<div class="popover">
-	<button type="button">{TRIGGER}</button>
-	<section data-popover aria-hidden="true">{CONTENT}</section>
-</div>
-```
-
-Toggling sets `aria-hidden` on content and `aria-expanded` on trigger.
-
-### Dropdown Menu (JS)
-
-```html
-<div class="dropdown-menu">
-	<button type="button">{TRIGGER}</button>
-	<div role="menu">
-		<button role="menuitem">{ITEM}</button>
-	</div>
-</div>
-```
-
-Uses `basecoat:popover` to coordinate with other popovers.
-
-### Command (JS)
-
-Command palette with search and results.
-
-```html
-<div class="command">
-	<header><input type="text" placeholder="Search" /></header>
-	<div role="menu">
-		<button role="menuitem">{ITEM}</button>
-	</div>
-</div>
-```
-
-Wrapper variant: `command-dialog` for Command in a dialog.
-
-### Dialog (CSS/Native)
-
-Styled native `<dialog>` element. Use `.command-dialog` variant to wrap `.command`.
-
-### Alert Dialog (CSS/Native)
-
-Confirm/cancel flow using `<dialog>` semantics.
-
-### Drawer (CSS/Native)
-
-Off-canvas using `<dialog>`/popover.
-
-### Toast (JS)
-
-Global notifications container:
-
-```html
-<section id="toaster"></section>
-```
-
-Show a toast:
-
-```js
-document.dispatchEvent(
-	new CustomEvent("basecoat:toast", {
-		detail: {
-			config: {
-				title: "Saved",
-				description: "Changes persisted",
-				category: "success",
-			},
-		},
-	}),
-);
-```
-
-### Sidebar (JS)
-
-```html
-<nav class="sidebar">
-	<!-- Collapsible items with aria-current="page" for active link -->
-</nav>
-```
-
-### Breadcrumb (CSS)
-
-```html
-<nav class="breadcrumb">
-	<ol>
-		...
-	</ol>
-</nav>
-```
-
-### Pagination (CSS)
-
-```html
-<nav class="pagination">...</nav>
-```
-
-### Table (CSS)
-
-```html
-<table class="table">
-	...
-</table>
-```
-
-### Progress (CSS)
-
-```html
-<div class="progress">...</div>
-```
-
-### Slider (CSS)
-
-```html
-<input type="range" class="slider" />
-```
-
-### Spinner (CSS)
-
-```html
-<div class="spinner"></div>
-```
-
-### Skeleton (CSS)
-
-```html
-<div class="skeleton"></div>
-```
-
-### Kbd (CSS)
-
-```html
-<kbd class="kbd">⌘K</kbd>
-```
-
-### Item (CSS)
-
-List rows with icons and actions.
-
-```html
-<div class="item">...</div>
-```
-
-### Empty State (CSS)
-
-```html
-<div class="empty">...</div>
-```
-
-### Field (CSS)
-
-Wrapper for label, input, hint, error.
-
-```html
-<div class="field">
-	<label class="label">...</label>
-	<input class="input" />
-	<span class="hint">...</span>
-</div>
-```
-
-### Form (CSS)
-
-Form layout and validation styling patterns.
-
-### Input Group (CSS)
-
-Grouped input patterns.
-
-### Theme Switcher (JS-lite)
-
-```html
-<div class="theme-switcher">...</div>
-```
+### Layout & Structure
+
+- [Accordion](references/accordion.md) - styled `<details>` element
+- [Card](references/card.md) - container with header/content/footer
+- [Dialog](references/dialog.md) - modal using native `<dialog>`
+- [Drawer](references/dialog.md) - off-canvas dialog
+- [Field](references/field.md) - form field with label/helper/error
+- [Fieldset](references/field.md) - group related fields
+- [Form](references/form.md) - form wrapper that styles children
+- [Input Group](references/input-group.md) - input with icons/buttons
+
+### Form Controls
+
+- [Button](references/button.md) - button variants and sizes
+- [Button Group](references/button.md) - grouped buttons
+- [Checkbox](references/form.md) - checkbox input
+- [Input](references/form.md) - text input
+- [Label](references/form.md) - form label
+- [Radio](references/form.md) - radio input
+- [Select](references/select.md) - native and custom select
+- [Switch](references/form.md) - toggle switch
+- [Textarea](references/form.md) - multi-line input
+
+### Navigation
+
+- [Breadcrumb](references/breadcrumb.md) - navigation path
+- [Pagination](references/navigation.md) - page navigation
+- [Sidebar](references/navigation.md) - collapsible navigation
+- [Table](references/navigation.md) - data table
+- [Tabs](references/tabs.md) - tabbed interface
+
+### Overlays
+
+- [Alert Dialog](references/dialog.md) - critical confirmation dialog
+- [Dropdown Menu](references/dropdown.md) - contextual menu
+- [Popover](references/popover.md) - floating content panel
+- [Tooltip](references/tooltip.md) - hover info popup
+
+### Feedback
+
+- [Alert](references/alert.md) - callout for user attention
+- [Empty](references/misc.md) - empty state placeholder
+- [Progress](references/misc.md) - progress bar
+- [Skeleton](references/misc.md) - loading placeholder
+- [Spinner](references/misc.md) - loading spinner
+- [Toast](references/toast.md) - global notifications
+
+### Command & Search
+
+- [Command](references/command.md) - command palette
+- [Combobox](references/command.md) - select with search
+
+### Display
+
+- [Avatar](references/avatar.md) - user image (Tailwind utilities)
+- [Badge](references/badge.md) - status indicators
+- [Carousel](references/carousel.md) - scrollable content
+- [Chart](references/chart.md) - data visualization
+- [Item](references/misc.md) - list row with icon
+- [Kbd](references/misc.md) - keyboard key styling
+- [Slider](references/misc.md) - range input
+- [Theme Switcher](references/misc.md) - theme toggle
 
 ## Events
 
-| Event                  | Target         | Description                                   |
-| ---------------------- | -------------- | --------------------------------------------- |
-| `basecoat:initialized` | Component root | Emitted after a component initializes         |
-| `basecoat:popover`     | Document       | Closes other popovers when one opens          |
-| `basecoat:toast`       | Document       | Creates a toast with `{ detail: { config } }` |
+- `basecoat:initialized` - on component root after init
+- `basecoat:popover` - on document when popover opens
+- `basecoat:toast` - on document to show toast
 
-## Accessibility
+## Rules
 
-- Use semantic roles and ARIA attributes per component examples
-- Keep `aria-*` for semantics and `data-*` for visual states
-- Disabled items must use `disabled` or `aria-disabled="true"` to be filtered from interactions
-
-## Common Pitfalls
-
-- Do not invent class names; use documented classes only
-- The package name is `basecoat-css` (not `basecoat` or `@basecoat/css`)
-- Interactive components require specific roles/attributes
-- Basecoat is framework-agnostic; don't add React/Radix dependencies
-
-## Troubleshooting
-
-If interactivity doesn't work:
-
-1. Ensure the component's JS is loaded
-2. Verify required roles/IDs match the examples
-3. For dynamic content, call `window.basecoat.init('<name>')` or `initAll()` after insertion
-
-## License
-
-MIT (see LICENSE.md)
+- Use documented classes only
+- Package is `basecoat-css` (not `basecoat`)
+- Interactive components need specific roles/attributes
+- Framework-agnostic: no React/Radix deps
