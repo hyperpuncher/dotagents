@@ -11,7 +11,7 @@ description: Web search via Brave search engine.
 ## Search
 
 ```sh
-./brave-search "query"
+brave-search "query"
 ```
 
 ## When to Use
