@@ -1,28 +1,27 @@
-## rules
+## communication
 
-- use conventional commits: `feat|fix|refactor|build|ci|chore|docs|style|perf|test`
-- clone repo into `~/projects/docs/` for reference when needed
+- use plain, concise, human language
+- avoid unnecessary jargon
+- use lowercase wherever possible, except when exact casing matters
+
+## workflow
+
+- for documentation research, search `~/docs/` first, clone any missing repo there with `git clone --depth=1 --single-branch --no-tags`, read relevant READMEs, `AGENTS.md` files, and files in docs directories in full, then summarize the key points
 - use `/tmp` for temporary files
-- always typecheck, lint, and format before finishing
-- never commit unless the user explicitly asks
-- never use python for file edits
+- never commit unless explicitly asked
+- before committing, format, lint, and typecheck
+- use conventional commits: `feat|fix|refactor|build|ci|chore|docs|style|perf|test`
+- use the package manager specified by `package.json` or lockfiles, defaulting to `bun`
+- install dependencies with package manager commands instead of editing manifests by hand, and prefer latest versions
 
 ## tool preferences
 
 | use this | not this |
 | -------- | -------- |
 | `trash`  | `rm`     |
-| `fd`     | `find`   |
-| `rg`     | `grep`   |
-| `sd`     | `sed`    |
 | `bunx`   | `npx`    |
 | `uv`     | `pip`    |
 
-## package manager
-
-- detect from `package.json` (bun, npm, pnpm, yarn)
-- if none use `bun`
-
 ## formatting
 
-- tabs for indentation
+- use tabs unless the project specifies different formatting
