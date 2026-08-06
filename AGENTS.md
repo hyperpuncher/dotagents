@@ -13,6 +13,7 @@
 - use conventional commits: `feat|fix|refactor|build|ci|chore|docs|style|perf|test`
 - use the package manager specified by `package.json` or lockfiles, defaulting to `bun`
 - install dependencies with package manager commands instead of editing manifests by hand, and prefer latest versions
+- before adding shared helpers or UI, search for equivalent code and reuse it when behavior matches
 
 ## tool preferences
 
