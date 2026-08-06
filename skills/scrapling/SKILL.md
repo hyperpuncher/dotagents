@@ -1,273 +1,134 @@
 ---
 name: scrapling
-description: CLI tool for web scraping - extract data from websites via terminal without programming. Powerful extract commands for HTTP requests and browser automation.
+description: scrape websites from the terminal using HTTP, browser automation, or stealth mode. use for quick extraction, JavaScript-rendered pages, and protected sites.
 ---
 
-# scrapling
+# scrapling cli
 
-Scrapling is a powerful Python web scraping library with a comprehensive CLI for extracting data from websites directly from the terminal without writing code. The primary use case is the `extract` command group for quick data extraction.
+use `scrapling extract` to fetch a page and save selected or full content without writing code.
 
-## Installation
-
-Install with the shell extras using uv:
+## setup
 
 ```bash
 uv tool install "scrapling[shell]"
-```
-
-Then install fetcher dependencies (browsers, system dependencies, fingerprint manipulation):
-
-```bash
 scrapling install
 ```
 
-Update to the latest version:
+update Scrapling and refresh browsers and fingerprints when required by a release:
 
 ```bash
-uv tool update "scrapling[shell]"
+uv tool upgrade scrapling
+scrapling install --force
 ```
 
-## Extract Commands (Primary Usage)
+## required safety
 
-The `scrapling extract` command group allows you to download and extract content from websites without writing any code. Output format is determined by file extension:
+always add `--ai-targeted` when content will be read by an AI model. it keeps the main body, removes noisy and hidden content that may contain prompt injection, strips comments and zero-width characters, and enables ad blocking for browser commands.
 
-> **Note:** All examples use `--ai-targeted` by default. This flag extracts only main body content, strips noise tags (script, style, noscript, svg), removes hidden elements, strips zero-width unicode characters, and removes HTML comments - ideal when output is destined for an AI model.
+## choose a command
 
-- `.md` - Convert HTML to Markdown
-- `.html` - Save raw HTML
-- `.txt` - Extract clean text content
+| use case                          | command                        |
+| --------------------------------- | ------------------------------ |
+| static pages, blogs, news, APIs   | `get`, `post`, `put`, `delete` |
+| JavaScript-rendered pages         | `fetch`                        |
+| Cloudflare or anti-bot protection | `stealthy-fetch`               |
 
-### Quick Start
+start with `get`, then try `fetch`, then `stealthy-fetch`.
+
+## output
+
+output format is selected by the file extension:
+
+- `.md`: markdown
+- `.html`: HTML
+- `.txt`: clean text
+
+prefer `.md` for readability and use `--css-selector` to reduce output.
+
+## common examples
 
 ```bash
-# Basic website download as text
-scrapling extract get "https://example.com" page_content.txt --ai-targeted
+# static page
+scrapling extract get "https://example.com" /tmp/page.md --ai-targeted
 
-# Download as markdown
-scrapling extract get "https://blog.example.com" article.md --ai-targeted
+# select matching elements
+scrapling extract get "https://example.com" /tmp/articles.md \
+	--css-selector "article" --ai-targeted
 
-# Save raw HTML
-scrapling extract get "https://example.com" page.html --ai-targeted
+# query parameters, headers, and cookies
+scrapling extract get "https://example.com/search" /tmp/results.md \
+	-p "q=scrapling" \
+	-H "Accept-Language: en-US" \
+	--cookies "session=abc123" \
+	--ai-targeted
+
+# form or JSON request
+scrapling extract post "https://example.com/search" /tmp/results.txt \
+	--data "q=scrapling" --ai-targeted
+
+scrapling extract put "https://example.com/resource" /tmp/result.txt \
+	--json '{"enabled":true}' --ai-targeted
+
+# JavaScript-rendered page
+scrapling extract fetch "https://example.com" /tmp/page.md \
+	--network-idle --ai-targeted
+
+# protected page
+scrapling extract stealthy-fetch "https://example.com" /tmp/page.md \
+	--solve-cloudflare --ai-targeted
 ```
 
-### Decision Guide: Which Command to Use?
+read the output file after the command finishes, then clean up temporary files.
 
-| Use Case                                      | Command                 |
-| --------------------------------------------- | ----------------------- |
-| Simple websites, blogs, news articles         | `get`                   |
-| Modern web apps, dynamic content (JavaScript) | `fetch`                 |
-| Protected sites, Cloudflare, anti-bot         | `stealthy-fetch`        |
-| Form submissions, APIs                        | `post`, `put`, `delete` |
+## key options
 
-### HTTP Request Commands
+all commands support:
 
-#### GET Request
+- `-s, --css-selector TEXT`: return all matching elements
+- `--ai-targeted`: sanitize content for AI consumption
+- `--proxy TEXT`: proxy URL
 
-Most common command for downloading website content:
+HTTP commands also support:
+
+- `-H, --headers TEXT`: repeatable `Key: Value` header
+- `--cookies TEXT`: `name=value; name2=value2`
+- `-p, --params TEXT`: repeatable query parameter
+- `--timeout INTEGER`: seconds; default `30`
+- `--impersonate TEXT`: browser fingerprint such as `chrome` or `firefox`
+- `--follow-redirects / --no-follow-redirects`
+- `--verify / --no-verify`
+- `--stealthy-headers / --no-stealthy-headers`
+- `--data TEXT` and `--json TEXT`: available for `post` and `put`
+
+`fetch` and `stealthy-fetch` also support:
+
+- `--headless / --no-headless`
+- `--network-idle / --no-network-idle`
+- `--disable-resources / --enable-resources`
+- `--wait INTEGER`: extra wait in milliseconds
+- `--wait-selector TEXT`
+- `--timeout INTEGER`: milliseconds; default `30000`
+- `--locale TEXT`
+- `-H, --extra-headers TEXT`
+- `--real-chrome / --no-real-chrome`
+- `--block-ads / --no-block-ads`
+- `--dns-over-https / --no-dns-over-https`: prevent DNS leaks when using a proxy
+- `--executable-path TEXT`: custom Chromium executable; falls back to `SCRAPLING_EXECUTABLE_PATH`
+
+`stealthy-fetch` additionally supports:
+
+- `--solve-cloudflare / --no-solve-cloudflare`
+- `--block-webrtc / --allow-webrtc`
+- `--allow-webgl / --block-webgl`
+- `--hide-canvas / --show-canvas`
+
+## help
 
 ```bash
-# Basic download
-scrapling extract get "https://news.site.com" news.md --ai-targeted
-
-# Download with custom timeout
-scrapling extract get "https://example.com" content.txt --timeout 60 --ai-targeted
-
-# Extract specific content using CSS selectors
-scrapling extract get "https://blog.example.com" articles.md --css-selector "article" --ai-targeted
-
-# Send request with cookies
-scrapling extract get "https://scrapling.requestcatcher.com" content.md \
-    --cookies "session=abc123; user=john" --ai-targeted
-
-# Add user agent
-scrapling extract get "https://api.site.com" data.json \
-    -H "User-Agent: MyBot 1.0" --ai-targeted
-
-# Add multiple headers
-scrapling extract get "https://site.com" page.html \
-    -H "Accept: text/html" \
-    -H "Accept-Language: en-US" --ai-targeted
-
-# With query parameters
-scrapling extract get "https://api.example.com" data.json \
-    -p "page=1" -p "limit=10" --ai-targeted
-```
-
-**GET options:**
-
-```
--H, --headers TEXT              HTTP headers "Key: Value" (multiple allowed)
---cookies TEXT                  Cookies "name1=value1;name2=value2"
---timeout INTEGER               Request timeout in seconds (default: 30)
---proxy TEXT                    Proxy URL from $PROXY_URL env variable
--s, --css-selector TEXT         Extract specific content with CSS selector
--p, --params TEXT               Query parameters "key=value" (multiple)
---follow-redirects / --no-follow-redirects  (default: True)
---verify / --no-verify          SSL verification (default: True)
---impersonate TEXT              Browser to impersonate (chrome, firefox)
---stealthy-headers / --no-stealthy-headers  (default: True)
---ai-targeted                   Extract main content and sanitize for AI
-```
-
-#### POST Request
-
-```bash
-# Submit form data
-scrapling extract post "https://api.site.com/search" results.html \
-    --data "query=python&type=tutorial" --ai-targeted
-
-# Send JSON data
-scrapling extract post "https://api.site.com" response.json \
-    --json '{"username": "test", "action": "search"}' --ai-targeted
-```
-
-**POST options:** (same as GET plus)
-
-```
--d, --data TEXT                 Form data "param1=value1&param2=value2"
--j, --json TEXT                 JSON data as string
-```
-
-#### PUT Request
-
-```bash
-# Send data
-scrapling extract put "https://api.example.com" results.html \
-    --data "update=info" \
-    --impersonate "firefox" --ai-targeted
-
-# Send JSON data
-scrapling extract put "https://api.example.com" response.json \
-    --json '{"username": "test", "action": "search"}' --ai-targeted
-```
-
-#### DELETE Request
-
-```bash
-scrapling extract delete "https://api.example.com/resource" response.txt --ai-targeted
-
-# With impersonation
-scrapling extract delete "https://api.example.com/" response.txt \
-    --impersonate "chrome" --ai-targeted
-```
-
-### Browser Fetching Commands
-
-Use browser-based fetching for JavaScript-heavy sites or when HTTP requests fail.
-
-#### fetch - Handle Dynamic Content
-
-For websites that load content dynamically or have slight protection:
-
-```bash
-# Wait for JavaScript to load and network activity to finish
-scrapling extract fetch "https://example.com" content.md --network-idle --ai-targeted
-
-# Wait for specific element to appear
-scrapling extract fetch "https://example.com" data.txt \
-    --wait-selector ".content-loaded" --ai-targeted
-
-# Visible browser mode for debugging
-scrapling extract fetch "https://example.com" page.html \
-    --no-headless --disable-resources --ai-targeted
-
-# Use installed Chrome browser
-scrapling extract fetch "https://example.com" content.md --real-chrome --ai-targeted
-
-# With CSS selector extraction
-scrapling extract fetch "https://example.com" articles.md \
-    --css-selector "article" \
-    --network-idle --ai-targeted
-```
-
-**fetch options:**
-
-```
---headless / --no-headless      Run browser headless (default: True)
---disable-resources             Drop unnecessary resources for speed boost
---network-idle                  Wait for network idle
---timeout INTEGER               Timeout in milliseconds (default: 30000)
---wait INTEGER                  Additional wait time in ms (default: 0)
--s, --css-selector TEXT         Extract specific content
---wait-selector TEXT            Wait for selector before proceeding
---locale TEXT                   User locale (default: system)
---real-chrome                   Use installed Chrome browser
---proxy TEXT                    Proxy URL
--H, --extra-headers TEXT        Extra headers (multiple)
---ai-targeted                   Extract main content and sanitize for AI
-```
-
-#### stealthy-fetch - Bypass Protection
-
-For websites with anti-bot protection or Cloudflare:
-
-```bash
-# Bypass basic protection
-scrapling extract stealthy-fetch "https://example.com" content.md --ai-targeted
-
-# Solve Cloudflare challenges
-scrapling extract stealthy-fetch "https://nopecha.com/demo/cloudflare" data.txt \
-    --solve-cloudflare \
-    --css-selector "#padded_content a" --ai-targeted
-
-# Use proxy for anonymity (set PROXY_URL environment variable)
-scrapling extract stealthy-fetch "https://site.com" content.md \
-    --proxy "$PROXY_URL" --ai-targeted
-
-# Hide canvas fingerprint
-scrapling extract stealthy-fetch "https://example.com" content.md \
-    --hide-canvas \
-    --block-webrtc --ai-targeted
-```
-
-**stealthy-fetch options:** (same as fetch plus)
-
-```
---block-webrtc                  Block WebRTC entirely
---solve-cloudflare              Solve Cloudflare challenges
---allow-webgl / --block-webgl   Allow WebGL (default: True)
---hide-canvas                   Add noise to canvas operations
---ai-targeted                   Extract main content and sanitize for AI
-```
-
-### CSS Selector Examples
-
-Extract specific content with the `-s` or `--css-selector` flag:
-
-```bash
-# Extract all articles
-scrapling extract get "https://blog.example.com" articles.md -s "article" --ai-targeted
-
-# Extract specific class
-scrapling extract get "https://example.com" titles.txt -s ".title" --ai-targeted
-
-# Extract by ID
-scrapling extract get "https://example.com" content.md -s "#main-content" --ai-targeted
-
-# Extract links (href attributes)
-scrapling extract get "https://example.com" links.txt -s "a::attr(href)" --ai-targeted
-
-# Extract text only
-scrapling extract get "https://example.com" titles.txt -s "h1::text" --ai-targeted
-
-# Extract multiple elements with fetch
-scrapling extract fetch "https://example.com" products.md \
-    -s ".product-card" \
-    --network-idle --ai-targeted
-```
-
-## Help Commands
-
-```bash
-scrapling --help
 scrapling extract --help
 scrapling extract get --help
-scrapling extract post --help
 scrapling extract fetch --help
 scrapling extract stealthy-fetch --help
 ```
 
-## Resources
-
-- Documentation: https://scrapling.readthedocs.io/
-- GitHub: https://github.com/D4Vinci/Scrapling
+resources: [documentation](https://scrapling.readthedocs.io/) · [github](https://github.com/D4Vinci/Scrapling)
