@@ -1,121 +1,135 @@
 ---
 name: chough
-description: Fast ASR CLI tool for transcribing audio/video files. Use when user wants to transcribe audio/video, generate subtitles (VTT), convert speech to text with timestamps (JSON), or optimize transcription for low memory.
+description: Fast ASR CLI tool for transcribing audio/video files. Use when user wants to transcribe audio/video, generate subtitles (VTT), convert speech to text with timestamps (JSON).
 ---
 
-## Installation
+# chough
 
-**Arch Linux:** `paru -S chough-bin`
-**macOS:** `brew install --cask hyperpuncher/tap/chough`
-**Windows:** `winget install chough`
-**Source:** `go install github.com/hyperpuncher/chough/cmd/chough@latest`
+use chough for fast, CPU-only transcription of audio or video. it supports plain text, timestamped JSON, and WebVTT subtitles.
 
-**Requires:** `ffmpeg` for audio/video support
+## install
 
-## Quick Reference
+- Arch Linux: `paru -S chough-bin`
+- macOS: `brew install --cask hyperpuncher/tap/chough`
+- Windows: `winget install chough`
+- source: `go install github.com/hyperpuncher/chough/cmd/chough@latest`
+
+`ffmpeg` is required. the first run downloads the roughly 650 MB model into the operating system's user cache under `chough/models/<model-name>`.
+
+## common usage
+
+flags must appear before the input file.
 
 ```bash
-# Basic transcription (text to stdout)
+# text to stdout
 chough audio.mp3
 
-# Pipe audio from stdin
+# audio from stdin
 cat audio.mp3 | chough
 
-# JSON with timestamps
+# timestamped JSON
 chough -f json podcast.mp3 > transcript.json
 
 # WebVTT subtitles
-chough -f vtt -o subs.vtt video.mp4
-
-# Low memory (30s chunks)
-chough -c 30 audiobook.mp3
-
-# Use remote server (requires CHOUGH_URL)
-chough --remote audio.mp3
+chough -f vtt -o subtitles.vtt video.mp4
 ```
 
-## Flags
+video input is supported whenever ffmpeg supports the format.
 
-| Flag               | Description                      | Default |
-| ------------------ | -------------------------------- | ------- |
-| `-c, --chunk-size` | Chunk size in seconds            | 60      |
-| `-f, --format`     | Output: text, json, vtt          | text    |
-| `-o, --output`     | Output file                      | stdout  |
-| `-r, --remote`     | Transcribe via CHOUGH_URL server | -       |
-| `--version`        | Show version                     | -       |
+## cli flags
 
-## Chunk Size Guide
+| flag                   | purpose                                   | default |
+| ---------------------- | ----------------------------------------- | ------- |
+| `-c, --chunk-size INT` | chunk size in seconds; maximum `300`      | `20`    |
+| `-f, --format FORMAT`  | `text`, `json`, or `vtt`                  | `text`  |
+| `-o, --output FILE`    | write output to a file                    | stdout  |
+| `-r, --remote`         | use the server configured by `CHOUGH_URL` | off     |
 
-- **15-30s**: Low memory (~500MB), higher error rate
-- **60s**: Balanced (default) - ~1.6GB RAM
+prefer the default 20-second chunk size.
 
-## Remote Mode
+## remote mode
 
-Use `--remote` flag to transcribe via an HTTP server instead of local processing. Requires `CHOUGH_URL` environment variable.
+set `CHOUGH_URL` to an HTTP or HTTPS server and pass `--remote`:
 
 ```bash
-# Set server URL
-export CHOUGH_URL=http://localhost:8080
-
-# Transcribe via remote server
-chough --remote audio.mp3
+CHOUGH_URL=http://localhost:8080 chough --remote audio.mp3
 ```
 
-Check for `CHOUGH_URL` env var → verify `/health` endpoint → use server if healthy, otherwise fallback to local CLI.
+when deciding whether to use an available remote server, check `${CHOUGH_URL}/health` first. fall back to local transcription if it is unavailable unless the user explicitly requires remote mode.
 
-### Endpoints
+## server mode
 
-| Method | Endpoint      | Description                                    |
-| ------ | ------------- | ---------------------------------------------- |
-| POST   | `/transcribe` | Transcribe audio (file upload, URL, or base64) |
-| GET    | `/health`     | Health check with queue status                 |
-
-### Examples
+start a server that keeps the model loaded between requests:
 
 ```bash
-# Upload file
-curl -X POST http://localhost:8080/transcribe \
-  -F "file=@audio.mp3" \
-  -F "format=json" \
-  -F "chunk_size=60"
+chough --server --port 8080
 
-# Transcribe from URL
-curl -X POST http://localhost:8080/transcribe \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://example.com/audio.mp3", "format": "vtt"}'
+chough --server \
+	--host 0.0.0.0 \
+	--port 8080 \
+	--workers 2 \
+	--queue-size 10
+```
 
-# Base64 audio
-curl -X POST http://localhost:8080/transcribe \
-  -H "Content-Type: application/json" \
-  -d '{"base64": "...", "format": "text"}'
+| flag                   | purpose                                   | default   |
+| ---------------------- | ----------------------------------------- | --------- |
+| `--host`               | listen address                            | `0.0.0.0` |
+| `--port`               | listen port                               | `8080`    |
+| `--workers`            | concurrent audio-preparation workers      | `2`       |
+| `--queue-size`         | maximum queued requests                   | `10`      |
+| `--max-upload`         | maximum audio size in MB                  | `1024`    |
+| `--allow-private-urls` | allow URL downloads from private networks | off       |
 
-# Health check
+server mode has no authentication, TLS, CORS policy, or rate limiting. do not expose it directly to the public internet; use a trusted reverse proxy when those controls are required.
+
+URL transcription blocks loopback, private, link-local, multicast, and other special-use destinations, including after redirects. only use `--allow-private-urls` for trusted LAN or homelab sources.
+
+## HTTP API
+
+| method | endpoint      | purpose                                           |
+| ------ | ------------- | ------------------------------------------------- |
+| `POST` | `/transcribe` | transcribe an upload, public URL, or base64 audio |
+| `GET`  | `/health`     | inspect model and queue status                    |
+
+```bash
+# upload
+curl -X POST http://localhost:8080/transcribe \
+	-F "file=@audio.mp3" \
+	-F "format=json"
+
+# public URL
+curl -X POST http://localhost:8080/transcribe \
+	-H "Content-Type: application/json" \
+	-d '{"url":"https://example.com/audio.mp3","format":"vtt"}'
+
+# base64
+curl -X POST http://localhost:8080/transcribe \
+	-H "Content-Type: application/json" \
+	-d '{"base64":"...","format":"text"}'
+
 curl http://localhost:8080/health
 ```
 
-## Performance
+## JSON output
 
-| Duration | Time  | Speed          |
-| -------- | ----- | -------------- |
-| 15s      | 2.0s  | 7.4x realtime  |
-| 1min     | 4.3s  | 14.1x realtime |
-| 5min     | 16.2s | 18.5x realtime |
-| 30min    | 90.2s | 19.9x realtime |
+JSON chunks always contain `start_time`, `end_time`, and `text`. when supplied by the recognizer, they also contain aligned arrays:
 
-## Troubleshooting
+- `tokens`: recognizer tokens
+- `timestamps`: token start times in seconds
+- `durations`: token durations in seconds
+- `log_probs`: token log probabilities
 
-**Out of memory:** Use `-c 30` or `-c 15`
-**Model fails:** Check internet, verify `$XDG_CACHE_HOME` is writable
-**ffmpeg errors:** Ensure ffmpeg is installed
+optional arrays are omitted when they are unavailable or not aligned with the tokens.
 
-## Notes
+## environment
 
-- First run downloads ~650MB model to `$XDG_CACHE_HOME/chough/models`
-- Auto-extracts audio from video files
-- Set `CHOUGH_MODEL` env var to use custom model path
-- Set `CHOUGH_URL` env var for `--remote` mode (must start with `http://` or `https://`)
-- VTT groups tokens into subtitle cues automatically
+- `CHOUGH_MODEL`: custom model directory
+- `CHOUGH_URL`: remote server URL for `--remote`; must start with `http://` or `https://`
 
-## Docs
+## troubleshooting
 
-- [GitHub](https://github.com/hyperpuncher/chough)
+- ffmpeg errors: confirm `ffmpeg` is installed and supports the input format
+- model errors: confirm the user cache directory is writable, or set `CHOUGH_MODEL`
+- memory pressure: try a smaller positive `--chunk-size`
+
+resources: [github](https://github.com/hyperpuncher/chough)
