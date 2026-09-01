@@ -14,4 +14,5 @@ bunx skills add hyperpuncher/dotagents
 | [brave-search](skills/brave-search/SKILL.md) | Web search via Brave search engine |
 | [chough](skills/chough/SKILL.md)             | Fast ASR CLI tool for transcribing |
 | [datastar](skills/datastar/SKILL.md)         | Hypermedia framework               |
+| [modern-css](skills/modern-css/SKILL.md)     | Modern native CSS patterns         |
 | [scrapling](skills/scrapling/SKILL.md)       | Web scraping                       |
