@@ -58,6 +58,29 @@ Do not have command endpoints patch a view that a separate update stream will im
 
 Batch or throttle render notifications when updates are frequent. Always render the latest state after a batch rather than sending fragile deltas. Cache/share rendered work where many users receive the same view.
 
+## high-frequency update patterns
+
+One SSE connection can carry many independently targeted element and signal patches. A single stream does not imply one patch target.
+
+For rapidly changing plain values, bind existing DOM to view-only signals and patch only those signals:
+
+```html
+<pre data-text="$_output"></pre>
+```
+
+This fits counters, progress, logs, raster-like text frames, and attribute values. It avoids reparsing HTML when the DOM structure is unchanged.
+
+For rapidly changing structured HTML:
+
+- batch notifications to the desired display or application rate
+- render the latest authoritative state after each batch
+- morph the smallest stable region that owns the changing structure
+- do not include unrelated hidden dialogs, pickers, or large payloads in the hot patch
+
+For progressive work, send multiple ordered element patches through one SSE response. Each event may target a different stable region. This keeps ordering without forcing every update through a page-wide morph.
+
+Fat morphs remain the default for ordinary state changes. They stop being a good default when profiling shows that a high-frequency path repeatedly parses large unchanged subtrees. Optimize that measured hot path without introducing a second source of truth.
+
 ## user experience
 
 - use `data-indicator` for ordinary request progress.
